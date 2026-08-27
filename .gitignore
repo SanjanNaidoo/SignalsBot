@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+
+# Course materials are copyright UCT / the course convener — never commit them.
+corpus/raw/*
+!corpus/raw/README.md
+corpus/processed/*
+!corpus/processed/.gitkeep
+
+# Run outputs are large and regenerable.
+runs/*
+!runs/.gitkeep

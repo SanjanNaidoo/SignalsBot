@@ -1,0 +1,53 @@
+# Course configuration. Adapting the tutor to another course should mean
+# writing a new file like this one and pointing at a different corpus —
+# no code changes. That is the "adaptable to new courses" deliverable.
+
+course:
+  code: EEE4114F
+  name: Digital Signal Processing
+  institution: University of Cape Town
+  level: 4
+  convener: null          # fill in — needed for the corpus permission trail
+
+# TODO(sanjan): replace this with the actual course outline from the EEE4114F
+# handbook / Amathuba site. Topic ids are used to tag corpus chunks and benchmark
+# items, so getting them right early avoids re-tagging later.
+topics:
+  - id: sampling
+    name: Sampling, aliasing and reconstruction
+  - id: dtft-dft
+    name: DTFT, DFT and the FFT
+  - id: ztransform
+    name: The z-transform and system analysis
+  - id: fir-design
+    name: FIR filter design
+  - id: iir-design
+    name: IIR filter design
+  - id: random-signals
+    name: Random signals and stochastic processes
+  - id: spectral-estimation
+    name: Power spectral density and spectral estimation
+  - id: optimal-filtering
+    name: Optimal and adaptive filtering
+
+# Behavioural policy. These are pedagogical choices and each one needs a
+# defence in the report — they are the difference between a tutor and a
+# homework-answering machine.
+policy:
+  # Scaffold toward the answer on assessed work rather than handing it over.
+  socratic_on_assessed_work: true
+  # Every substantive claim cites a corpus chunk.
+  require_citations: true
+  # Say "that isn't covered in EEE4114F" rather than answering from general knowledge.
+  refuse_out_of_scope: true
+  # Notation must match the course's, not a textbook's.
+  notation_source: course_notes
+
+retrieval:
+  chunk_tokens: 800
+  chunk_overlap_tokens: 150
+  top_k: 8
+
+model:
+  id: claude-opus-5
+  max_tokens: 8000
