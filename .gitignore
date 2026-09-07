@@ -4,13 +4,19 @@ __pycache__/
 venv/
 .env
 .DS_Store
+*.egg-info/
+build/
+dist/
 
 # Course materials are copyright UCT / the course convener — never commit them.
 corpus/raw/*
 !corpus/raw/README.md
+# The manifest is a permission trail, not course content. It must survive.
+!corpus/raw/MANIFEST.md
 corpus/processed/*
 !corpus/processed/.gitkeep
 
-# Run outputs are large and regenerable.
+# Run outputs are large and regenerable. Grades are NOT — grades/ is committed,
+# because a human sat and produced them and they cannot be recreated.
 runs/*
 !runs/.gitkeep
