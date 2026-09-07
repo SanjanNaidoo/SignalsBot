@@ -7,18 +7,45 @@ course:
   name: Digital Signal Processing
   institution: University of Cape Town
   level: 4
-  convener: null          # fill in — needed for the corpus permission trail
+  convener: Dr Yaaseen Martin
 
-# TODO: replace this with the actual course outline from the EEE4114F
-# handbook / Amathuba site. Topic ids are used to tag corpus chunks and benchmark
-# items, so getting them right early avoids re-tagging later.
+# From the 2026 Course Handout: Part A is classical DSP, Part B is an
+# introduction to machine learning. Topic ids tag corpus chunks and benchmark
+# items. `patterns` are case-insensitive filename substrings used at ingestion
+# to tag single-topic files (lecture slides, mostly); tests, exams and the main
+# note sets span topics and are deliberately left untagged.
 topics:
+  # --- Part A: digital signal processing ---
+  - id: dt-signals-systems
+    name: Discrete-time signals and systems
   - id: sampling
     name: Sampling, aliasing and reconstruction
   - id: dtft-dft
-    name: DTFT, DFT and the FFT
+    name: DTFT, DFT properties and fast algorithms
   - id: ztransform
-    name: The z-transform and system analysis
+    name: The z-transform and frequency response from the z-plane
+  - id: filter-design
+    name: FIR and IIR filter design and structures
+    patterns: [lowpass, leakingfilter, movingave]
+  - id: spectrum-estimation
+    name: Windows and spectrum estimation
+    patterns: [spectrumest]
+  # --- Part B: machine learning ---
+  - id: ml-supervised
+    name: Supervised learning, regression and nearest neighbours
+    patterns: [knn, linear_regression, supervised_learning, gradient_descent]
+  - id: neural-networks
+    name: Neural networks, CNNs and training
+    patterns: [neural, backprop, forward, foward, fc_network, cnn, padding,
+               shared_param, subsampling, training.pdf]
+  - id: ml-evaluation
+    name: Model evaluation, bias and variance
+    patterns: [model_eval, bias_variance]
+  - id: reinforcement-learning
+    name: Reinforcement learning fundamentals
+    patterns: [rl_, "rl ", td learning, policies_value]
+  - id: unsupervised-learning
+    name: Unsupervised learning (introduction)
 
 # Behavioural policy. These are pedagogical choices and each one needs a
 # defence in the report — they are the difference between a tutor and a

@@ -9,6 +9,8 @@ description = "YM-07 course tutor — benchmark harness for EEE4114F"
 requires-python = ">=3.11"
 dependencies = [
     "anthropic>=0.40",
+    "fonttools>=4.0",   # lets pypdf decode the Type1 fonts in the older course PDFs
+    "pypdf>=5.0",
     "pyyaml>=6.0",
 ]
 

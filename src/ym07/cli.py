@@ -1,5 +1,6 @@
 """Command line entry point.
 
+  ym07 ingest                    build the retrieval corpus from corpus/raw
   ym07 items                     validate the benchmark set and show coverage
   ym07 conditions                list the experimental conditions
   ym07 run C0-baseline           run one condition (add --dry-run for no API calls)
@@ -18,6 +19,7 @@ from pathlib import Path
 from .conditions import CONDITIONS, get_condition, repeat
 from .config import load_config
 from .grading import grade_interactively, load_grades
+from .ingest import ingest
 from .items import coverage, load_items
 from .model import build_client
 from .report import breakdown, render, summarise
@@ -65,6 +67,30 @@ def cmd_conditions(args) -> int:
               f"prompt={'yes' if condition.use_course_prompt else 'no'} "
               f"retrieval={'top_k=' + str(condition.resolved_top_k(config)) if condition.use_retrieval else 'no'}")
         print(f"  {condition.purpose}\n")
+    return 0
+
+
+def cmd_ingest(args) -> int:
+    config = load_config(args.config)
+    summary = ingest(
+        raw_dir=Path(args.raw), out_path=Path(args.out), config=config
+    )
+
+    print(f"\nWrote {summary['chunks']} chunks from "
+          f"{summary['files_ingested']} files to {summary['out_path']}\n")
+    print("  chunks by topic:")
+    for topic, count in summary["topic_counts"].items():
+        print(f"    {topic:<24} {count}")
+    for label, names in (
+        ("duplicate files skipped", summary["duplicates"]),
+        ("no text layer (need OCR or manual handling)", summary["no_text_layer"]),
+        ("partially ingested (image-heavy)", summary["partial"]),
+        ("unsupported format, skipped", summary["unsupported"]),
+    ):
+        if names:
+            print(f"\n  {label}:")
+            for name in names:
+                print(f"    {name}")
     return 0
 
 
@@ -200,6 +226,12 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("conditions", help="list the experimental conditions")
     _common(p); p.set_defaults(func=cmd_conditions)
+
+    p = sub.add_parser("ingest", help="build the retrieval corpus from corpus/raw")
+    _common(p)
+    p.add_argument("--raw", default="corpus/raw")
+    p.add_argument("--out", default=DEFAULT_CHUNKS)
+    p.set_defaults(func=cmd_ingest)
 
     p = sub.add_parser("run", help="run one or more conditions")
     _common(p)

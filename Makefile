@@ -26,6 +26,9 @@ $(CHUNKS): scripts/make_demo_corpus.py
 demo: setup $(CHUNKS)  ## Narrated walkthrough — no API calls, nothing spent
 	@./scripts/demo.sh
 
+ingest: setup  ## Build the retrieval corpus from corpus/raw
+	@$(YM07) ingest
+
 items: setup  ## Validate the benchmark set and show coverage
 	@$(YM07) items
 

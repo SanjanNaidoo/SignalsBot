@@ -17,6 +17,11 @@ import yaml
 class Topic:
     id: str
     name: str
+    # Case-insensitive substrings matched against raw filenames at ingestion
+    # time; the first topic (in config order) with a match tags the file's
+    # chunks. Files matching nothing (tests, exams, the main notes) span
+    # topics and are honestly left untagged rather than guessed.
+    patterns: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -97,7 +102,12 @@ def load_config(path: str | Path) -> CourseConfig:
         raise ValueError(f"{path}: course.code is required")
 
     topics = tuple(
-        Topic(id=t["id"], name=t.get("name", t["id"])) for t in raw.get("topics") or []
+        Topic(
+            id=t["id"],
+            name=t.get("name", t["id"]),
+            patterns=tuple(t.get("patterns") or ()),
+        )
+        for t in raw.get("topics") or []
     )
     if not topics:
         raise ValueError(f"{path}: at least one topic is required")

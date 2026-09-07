@@ -89,11 +89,7 @@ class LexicalRetriever:
 
 
 def load_chunks(path: str | Path) -> list[Chunk]:
-    """Read corpus/processed/chunks.jsonl.
-
-    Ingestion (PDF -> text -> chunks) is not part of the harness; this is the
-    format it must produce.
-    """
+    """Read corpus/processed/chunks.jsonl, as produced by `ym07 ingest`."""
     path = Path(path)
     if not path.exists():
         return []
