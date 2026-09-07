@@ -44,8 +44,12 @@ topics:
   - id: reinforcement-learning
     name: Reinforcement learning fundamentals
     patterns: [rl_, "rl ", td learning, policies_value]
-  - id: unsupervised-learning
-    name: Unsupervised learning (introduction)
+
+# Not a topic: unsupervised learning. The course outline lists it, but no
+# teaching material for it exists on the course site — k-means appears once in
+# the whole corpus, in a 2018 exam paper. Benchmarking a grounded tutor on
+# material that was never taught measures nothing about the design, so it is
+# out of scope for both the corpus and the item set.
 
 # Behavioural policy. These are pedagogical choices and each one needs a
 # defence in the report — they are the difference between a tutor and a
