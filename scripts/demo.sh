@@ -63,7 +63,7 @@ step "2/5  The benchmark — and its gaps, stated openly" \
   "$YM07" items
 
 note ""
-note "8 seed items. The real target is ~120, written from tutorials and past"
+note "51 items across all 10 course topics, written from the notes, tutorials and past"
 note "papers. error_finding and integrity are the types a generic chatbot"
 note "handles worst, and the ones that will differentiate the results."
 

@@ -27,7 +27,7 @@ from .retrieval import build_retriever
 from .runner import MissingCorpusError, discover_runs, load_run, run_condition
 
 DEFAULT_CONFIG = "configs/eee4114f.yaml"
-DEFAULT_ITEMS = "bench/eee4114f.seed.jsonl"
+DEFAULT_ITEMS = "bench/eee4114f.jsonl"
 DEFAULT_CHUNKS = "corpus/processed/chunks.jsonl"
 DEFAULT_RUNS = "runs"
 DEFAULT_GRADES = "grades/grades.jsonl"

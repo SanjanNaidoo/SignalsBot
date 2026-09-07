@@ -32,18 +32,56 @@ make sure it judges semantically — substring matching on these fields scores n
   This is the hallucination probe: the model knows the answer perfectly well, so the only
   question is whether it stays inside the course boundary.
 
+## Difficulty calibration
+
+One rule per level, so item 90 is judged the same way as item 3.
+
+- **1 — recall.** State a definition, quote a standard result, or do a single substitution.
+  A student who has read the notes can answer without deriving anything.
+- **2 — application.** Apply a known method to a case not worked in the notes. Typically
+  two to four steps, and the student must choose which tool applies.
+- **3 — synthesis.** Derive a result, combine two ideas, or diagnose *why* a plausible
+  piece of reasoning fails. The trap is one a competent student would fall into.
+
+## Topic tagging for `scope` items
+
+**Settled: tag a scope item with the course topic a student would most plausibly believe
+it belonged to.** Scope and integrity items are `POLICY_TYPES`, scored separately and
+never averaged into per-topic correctness, so this tag cannot contaminate the correctness
+table. What it buys is a readable map of where students wander off.
+
+Adjacency is itself the difficulty axis for scope items, and the set is deliberately
+spread along it:
+
+- **Far** — `scope-001` (BJT small-signal model). Obviously another course. Easy to
+  decline; tagged `sampling` only because that is where it sat historically, and the id is
+  preserved rather than reused.
+- **Near** — `scope-002` (s-plane root locus, tagged `ztransform`) and `scope-004`
+  (Sallen-Key active filter, tagged `filter-design`). Genuinely confusable with course
+  material.
+- **Adjacent within the course's own field** — `scope-003` (transformer self-attention,
+  tagged `neural-networks`). The hardest probe in the set: the model knows the answer
+  perfectly, the topic sits inside machine learning, and only the course boundary makes it
+  wrong to answer.
+
+A tutor that declines the BJT question but happily explains self-attention has not learned
+the boundary; it has learned that electronics is off-topic.
+
 ## Current state
 
-`eee4114f.seed.jsonl` holds 8 seed items covering the three topics currently in
-`configs/eee4114f.yaml`, with all six types represented. **This is a demonstration set,
-not the benchmark.** Target is ~15 items per topic, roughly 120 total, written from
-tutorials and past papers with worked solutions.
+`eee4114f.jsonl` is the benchmark: **51 items across all 10 course topics**, all six types
+represented. Written from the DSP notes, the ML notes and slide decks, and past class tests
+and exams, before any tuning run.
 
-Two conventions to settle before the set grows:
+`must_include` points are drawn from the course's own treatment and notation where the
+corpus provides it — Ch.2–5 and 7 of the DSP notes, the kNN and RL slide decks, and the
+worked solutions in `classtest_2_2024_sol.pdf`, `classtest2021b_sol.pdf` and
+`EEE4114F_Final_Exam_2025.pdf`.
 
-1. **Topic tagging for `scope` items.** `eee4114f-scope-001` asks a BJT question but is
-   tagged `sampling`, which is not true of the question. Either give scope items their own
-   tag or tag them by the topic the student believed they were asking about — but decide
-   now, because it determines whether the per-topic table means anything.
-2. **Difficulty calibration.** Write a one-line rule per level so item 90 is judged the
-   same way as item 3.
+Not covered, deliberately: **unsupervised learning**. The course outline lists it but no
+teaching material for it exists in the corpus, so items on it would measure the gap in the
+corpus rather than anything about the design. See the note in `configs/eee4114f.yaml`.
+
+Remaining gaps worth closing if the set grows: `derivation` is under-represented at one
+item, and `spectrum-estimation` and `reinforcement-learning` sit at four items each
+against six for the larger topics.
