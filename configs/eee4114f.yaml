@@ -9,7 +9,7 @@ course:
   level: 4
   convener: null          # fill in — needed for the corpus permission trail
 
-# TODO(sanjan): replace this with the actual course outline from the EEE4114F
+# TODO: replace this with the actual course outline from the EEE4114F
 # handbook / Amathuba site. Topic ids are used to tag corpus chunks and benchmark
 # items, so getting them right early avoids re-tagging later.
 topics:
@@ -19,16 +19,6 @@ topics:
     name: DTFT, DFT and the FFT
   - id: ztransform
     name: The z-transform and system analysis
-  - id: fir-design
-    name: FIR filter design
-  - id: iir-design
-    name: IIR filter design
-  - id: random-signals
-    name: Random signals and stochastic processes
-  - id: spectral-estimation
-    name: Power spectral density and spectral estimation
-  - id: optimal-filtering
-    name: Optimal and adaptive filtering
 
 # Behavioural policy. These are pedagogical choices and each one needs a
 # defence in the report — they are the difference between a tutor and a
@@ -50,4 +40,9 @@ retrieval:
 
 model:
   id: claude-opus-5
-  max_tokens: 8000
+  # Output cap per answer. Adaptive thinking is on by default on Opus 5 and its
+  # thinking tokens count against this, so leave headroom above the visible answer.
+  max_tokens: 16000
+  # Thinking depth / token spend: low | medium | high | xhigh | max.
+  # This is the cost lever — it is what C3-money varies.
+  effort: high

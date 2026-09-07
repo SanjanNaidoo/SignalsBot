@@ -1,0 +1,644 @@
+* **API/closed models:** easiest to implement and generally strongest, but you cannot inspect or host the weights.
+* **Open-weight models:** much better for reproducibility, experimentation, LoRA/fine-tuning and potentially local deployment.
+* **Hybrid:** some companies such as Mistral offer both downloadable weights and a hosted API.
+
+# 1. OpenAI GPT-5.6 Sol
+
+**What it is:** OpenAI's flagship GPT-5.6 model for difficult reasoning and professional work. It has a 1.05M-token context window, supports reasoning effort from none through max, function calling, structured outputs, image input and the Responses API. Current API pricing is $4/M input and $20/M output tokens. ([OpenAI Developers][1])
+
+**Pros**
+
+* Probably one of the strongest raw reasoning options.
+* Excellent candidate for difficult DSP derivations.
+* Strong tool calling for Python/MATLAB-style verification.
+* Huge context window.
+* Very mature RAG/tool ecosystem.
+* Excellent closed-model benchmark against which to compare open models.
+
+**Cons**
+
+* Expensive.
+* Closed weights.
+* Cannot self-host.
+* Cannot freeze the underlying weights yourself for long-term reproducibility.
+* Probably overkill for routine tutoring questions.
+
+**For your project:** ★★★★★
+**Role:** Maximum-performance benchmark.
+
+---
+
+# 2. OpenAI GPT-5.6 Terra
+
+**What it is:** The middle GPT-5.6 model, designed specifically to balance intelligence and cost. It retains the same 1.05M context window, 128K maximum output and reasoning/tool capabilities as the GPT-5.6 family, while costing $2/M input and $12/M output. ([OpenAI Developers][2])
+
+**Pros**
+
+* Very strong reasoning without Sol pricing.
+* Excellent RAG support.
+* Excellent function/tool calling.
+* Strong mathematical candidate.
+* Easy to integrate.
+* Same enormous context window as Sol.
+
+**Cons**
+
+* Still relatively expensive compared with Mistral/Qwen/DeepSeek.
+* Closed.
+* No self-hosting.
+* Less academically reproducible than a fixed open-weight model.
+
+**For your project:** ★★★★★
+**Role:** **My current default closed-model choice.**
+
+---
+
+# 3. OpenAI GPT-5.6 Luna
+
+**What it is:** The inexpensive GPT-5.6 model intended for high-volume workloads. It costs only $0.20/M input and $1.20/M output while retaining the GPT-5.6 family's large context window and configurable reasoning. ([OpenAI Developers][3])
+
+**Pros**
+
+* Extremely cheap.
+* Very easy to deploy at scale.
+* Same OpenAI API/tool ecosystem.
+* Good candidate for simple classification, routing and easy tutoring queries.
+
+**Cons**
+
+* Lower intelligence tier.
+* I would be wary of relying on it for multi-stage DSP mathematics.
+* Likely to require more verification/fallback logic.
+
+**For your project:** ★★★☆☆
+**Role:** Cheap model or router rather than primary tutor.
+
+---
+
+# 4. Claude Opus 5
+
+**What it is:** Anthropic's current Opus-class model, released in July 2026. It targets high-end coding, reasoning and professional knowledge work and costs $5/M input and $25/M output. ([Anthropic][4])
+
+**Pros**
+
+* Extremely capable reasoning model.
+* Strong at explaining complex material.
+* Strong tool use.
+* Good candidate for evaluating pedagogical explanations.
+* Excellent high-end comparison against GPT-5.6 Sol.
+
+**Cons**
+
+* Most expensive mainstream option here.
+* Closed weights.
+* Probably unnecessary for routine DSP questions.
+* Self-hosting/fine-tuning unavailable.
+
+**For your project:** ★★★★★
+**Role:** Premium closed-model benchmark.
+
+---
+
+# 5. Claude Sonnet 5
+
+**What it is:** Anthropic's newer cost-performance model. Sonnet 5 substantially improved reasoning, tool use and agentic behaviour over Sonnet 4.6 and costs $2/M input and $10/M output. Anthropic says higher reasoning effort can approach Opus-class performance on some workloads. ([Anthropic][5])
+
+**Pros**
+
+* Excellent reasoning/cost balance.
+* Likely excellent at tutoring-style explanations.
+* Strong tool use.
+* Much cheaper than Opus.
+* Very serious competitor to GPT-5.6 Terra.
+
+**Cons**
+
+* Closed.
+* Still substantially more expensive than Mistral Small 4.
+* Cannot self-host or fine-tune the base weights.
+
+**For your project:** ★★★★★
+**Role:** **Must-test model.**
+
+---
+
+# 6. Gemini 3.1 Pro
+
+**What it is:** Google's high-end Gemini reasoning model. Google currently describes 3.1 Pro as its most intelligent Gemini model, with multimodal capabilities; the current API version is still labelled preview. ([Google AI for Developers][6])
+
+**Pros**
+
+* Powerful reasoning.
+* Strong multimodal abilities.
+* Useful if students upload diagrams, plots or screenshots.
+* Strong Google tooling ecosystem.
+* Good candidate for complex technical questions.
+
+**Cons**
+
+* Preview status is unattractive for a dissertation.
+* A preview model can change or disappear.
+* Closed weights.
+* Less reproducible than a fixed open checkpoint.
+
+**For your project:** ★★★★☆
+**Role:** Interesting benchmark, but I'd prefer a GA model for the final system.
+
+---
+
+# 7. Gemini 3.7 Flash
+
+**What it is:** Google's newest production Flash model, made GA in August 2026. It has a 1M-token context window, adjustable low/medium/high thinking, tool support and costs $0.75/M input and $3.75/M output through December 31, 2026. ([Google AI for Developers][7])
+
+**Pros**
+
+* Very inexpensive for its capability.
+* 1M context.
+* Adjustable reasoning.
+* Multimodal.
+* Built-in code execution and function calling.
+* Excellent cost-performance candidate.
+* GA rather than preview.
+
+**Cons**
+
+* Closed.
+* Promotional pricing changes in 2027.
+* I'd want to specifically test mathematical reliability against GPT/Claude.
+* Google model turnover can complicate reproducibility.
+
+**For your project:** ★★★★★
+**Role:** **Must-test model.**
+
+This is potentially one of the most interesting competitors to Terra.
+
+---
+
+# 8. Gemini 3.6 Flash
+
+**What it is:** Gemini's previous-generation Flash model. It also offers roughly 1M context, thinking, code execution, file search, function calling and multimodal input. ([Google AI for Developers][8])
+
+**Pros**
+
+* Strong tool ecosystem.
+* Fast.
+* Multimodal.
+* Production stable.
+
+**Cons**
+
+* Already superseded by 3.7 Flash.
+* Little reason to begin a new study with it unless you want a historical comparison.
+
+**For your project:** ★★★☆☆
+**Role:** Skip unless needed for benchmarking.
+
+---
+
+# 9. Gemini 3.5 Flash-Lite
+
+**What it is:** Google's lightweight high-throughput Gemini model intended for inexpensive, low-latency workloads rather than maximum reasoning performance. ([Google AI for Developers][9])
+
+**Pros**
+
+* Very fast.
+* Cheap.
+* Great for routing/classification.
+* Suitable for huge numbers of easy queries.
+
+**Cons**
+
+* Not where I'd place the burden of DSP derivations.
+* Likely greater accuracy gap on difficult mathematics.
+
+**For your project:** ★★☆☆☆
+**Role:** Auxiliary model, not main tutor.
+
+---
+
+# 10. DeepSeek V4-Pro
+
+**What it is:** DeepSeek's V4 high-end model. The V4 generation uses a 1M context window and offers both thinking and non-thinking modes through an API compatible with common OpenAI/Anthropic interfaces. ([DeepSeek API Docs][10])
+
+**Pros**
+
+* Reasoning-focused.
+* Very long context.
+* Interesting independent comparison to US frontier labs.
+* API is relatively easy to swap into an existing architecture.
+* DeepSeek has historically been particularly interesting for mathematics/reasoning workloads.
+
+**Cons**
+
+* Another external API dependency.
+* Less conventional choice for a UCT educational deployment.
+* You would need to examine privacy/data-governance implications before sending course/student data.
+* Less mature education-specific ecosystem than OpenAI/Google/Anthropic.
+
+**For your project:** ★★★★☆
+**Role:** Very worthwhile experimental benchmark.
+
+---
+
+# 11. DeepSeek V4-Flash
+
+**What it is:** The smaller/faster V4 variant. DeepSeek positions it as approaching V4-Pro's reasoning performance while being smaller and cheaper, with the same 1M context architecture. ([DeepSeek API Docs][10])
+
+**Pros**
+
+* Cost efficient.
+* Fast.
+* Reasoning capability.
+* Large context.
+* Interesting competitor to Mistral Small 4 and Gemini Flash.
+
+**Cons**
+
+* Likely below V4-Pro on the hardest DSP problems.
+* Same governance/deployment considerations as DeepSeek Pro.
+
+**For your project:** ★★★★☆
+**Role:** Cost-performance benchmark.
+
+---
+
+# 12. Qwen3.8-Max
+
+**What it is:** Alibaba's current high-end Qwen API model. It supports a 1M-token context window, thinking mode, up to 131K output tokens and is available internationally through Model Studio. International pricing is currently around $2/M input and $6/M output. ([AlibabaCloud][11])
+
+**Pros**
+
+* Very strong price relative to flagship Western API models.
+* Huge context.
+* Good reasoning/tool architecture.
+* Multilingual ecosystem.
+* OpenAI-compatible APIs make integration straightforward.
+
+**Cons**
+
+* Closed hosted Max model.
+* More infrastructure/governance questions for a South African university deployment.
+* Less established in education research literature than GPT/Claude.
+* I'd want extensive English pedagogical testing.
+
+**For your project:** ★★★★☆
+**Role:** Interesting high-end alternative.
+
+---
+
+# 13. Mistral Medium 3.5
+
+**What it is:** Mistral's frontier-class multimodal model, available as weights under a Modified MIT licence as well as through Mistral's API. It has a 256K context and costs $1.50/M input and $7.50/M output through the hosted service. ([Mistral AI][12])
+
+**Pros**
+
+* Strong capability.
+* Downloadable weights.
+* Can freeze an exact model version.
+* Can potentially fine-tune it.
+* Hosted API available if you don't want to run hardware.
+* Excellent research reproducibility.
+
+**Cons**
+
+* 128B dense model makes self-hosting demanding.
+* Less cheap than Mistral Small 4.
+* Modified MIT rather than the very permissive Apache licence used by several other Mistral models.
+
+**For your project:** ★★★★★
+**Role:** Excellent open-weight high-performance option.
+
+---
+
+# 14. Mistral Small 4
+
+**What it is:** A **119B-total/6.5B-active MoE model** combining normal instruction following, reasoning, coding and multimodal capability. It has 256K context, Apache 2.0 weights, configurable reasoning and a remarkably cheap hosted API at $0.15/M input and $0.60/M output. ([Mistral AI][13])
+
+**Pros**
+
+* Open source under Apache 2.0.
+* Can freeze and archive the exact model.
+* Fine-tunable.
+* Extremely inexpensive API.
+* Reasoning mode.
+* Multimodal.
+* Strong research story.
+* Excellent RAG/tool support.
+* Very low active parameter count relative to total model size.
+
+**Cons**
+
+* Despite only ~6.5B active parameters per token, all those experts still make serious self-hosting substantially more involved than a normal 7–14B model.
+* Raw capability may trail the very best frontier models.
+* Requires testing for subtle DSP errors.
+
+**For your project:** ★★★★★
+**Role:** **My favourite open model for the study.**
+
+---
+
+# 15. Mistral Large 3
+
+**What it is:** Mistral's huge open-weight general-purpose model: **675B total parameters with 41B active**, 256K context and Apache 2.0 licensing. Its hosted API is surprisingly inexpensive at $0.50/M input and $1.50/M output. ([Mistral AI][14])
+
+**Pros**
+
+* Huge open model.
+* Apache 2.0.
+* Strong general reasoning.
+* Cheap hosted inference.
+* Excellent reproducibility.
+* Fine-tuning/customisation potential.
+
+**Cons**
+
+* Completely unrealistic to casually self-host on a normal PC.
+* Much more infrastructure than your project needs if self-hosting.
+* Small 4 may provide better practical efficiency.
+
+**For your project:** ★★★★½
+**Role:** Open frontier benchmark.
+
+---
+
+# 16. Ministral 3 14B
+
+**What it is:** Mistral's compact 14B model aimed at efficient deployment. It is Apache 2.0, multimodal, has a 256K context and can be run locally or through Mistral's API. ([Mistral AI][15])
+
+**Pros**
+
+* Actually practical to self-host compared with the giant models.
+* Fine-tunable.
+* Cheap.
+* Fully controllable.
+* Nice size for an academic experiment.
+
+**Cons**
+
+* Clear reasoning-capability compromise versus larger frontier models.
+* More likely to struggle with difficult DSP derivations.
+* RAG cannot fully compensate for inadequate reasoning.
+
+**For your project:** ★★★★☆
+**Role:** Very interesting **local-model baseline**.
+
+---
+
+# 17. Ministral 3 8B
+
+**What it is:** An even smaller Apache-2.0 Mistral general model designed for efficient inference with the same broad 256K-context family. ([Mistral AI][15])
+
+**Pros**
+
+* Easy to experiment with.
+* Low hardware requirement relative to frontier models.
+* Fine-tunable.
+* Cheap.
+* Good for demonstrating what a small local tutor can do.
+
+**Cons**
+
+* Significant reasoning deficit compared with Terra/Sonnet/etc.
+* Mathematical hallucinations become a larger concern.
+* Probably not my choice for the finished tutor.
+
+**For your project:** ★★★☆☆
+**Role:** Small-model research baseline.
+
+---
+
+# 18. Ministral 3 3B
+
+**What it is:** Mistral's tiny 3B model, Apache 2.0 and specifically designed for very inexpensive/edge inference. API pricing is only about $0.10/M input and output. ([Mistral AI][16])
+
+**Pros**
+
+* Tiny.
+* Extremely cheap.
+* Very easy to run.
+* Fine-tunable.
+* Could demonstrate how far RAG alone can push a small model.
+
+**Cons**
+
+* Far too weak to trust as the main DSP reasoner.
+* Complex z-transform/DTFT/derivation questions will expose the size limitation.
+
+**For your project:** ★★☆☆☆
+**Role:** Experimental low-end baseline.
+
+---
+
+# 19. Llama 4 Maverick
+
+**What it is:** Meta's higher-capability Llama 4 general model. It is natively multimodal and downloadable as open weights from Meta/Hugging Face rather than being limited to a proprietary API. ([AI Meta][17])
+
+**Pros**
+
+* Huge open-weight ecosystem.
+* Hugging Face/vLLM/llama.cpp support.
+* Can self-host.
+* Can fine-tune.
+* Easy to reproduce exact experiments.
+* Llama is widely recognised academically.
+
+**Cons**
+
+* Meta's licence is not the same as Apache-2.0 open source.
+* Large deployment requirements.
+* I'd specifically test mathematical reasoning before picking it over Mistral/Qwen/Gemma.
+* Less appealing on cost/reasoning grounds than some newer competitors.
+
+**For your project:** ★★★★☆
+**Role:** Important open-weight comparison.
+
+---
+
+# 20. Llama 4 Scout
+
+**What it is:** Meta's more efficiency-oriented Llama 4 model. A particularly unusual feature is its **10-million-token context window**, and Meta positions it for efficient multimodal inference. ([AI Meta][17])
+
+**Pros**
+
+* Extraordinary context length.
+* Open weights.
+* Fine-tunable.
+* Excellent ecosystem.
+* Potentially useful for massive document collections.
+
+**Cons**
+
+* 10M context is almost completely unnecessary for your RAG architecture.
+* Context size isn't the same thing as mathematical intelligence.
+* Maverick is the more natural Llama comparison for the actual tutor.
+
+**For your project:** ★★★½☆
+**Role:** Interesting, but not my first Llama pick.
+
+---
+
+# 21. Qwen3.6-35B-A3B
+
+**What it is:** Alibaba's newer open-weight sparse-MoE Qwen model with 35B total parameters and roughly 3B active. It supports text, images and video, function calling and a 256K-class context window, with specific improvements in mathematical reasoning over the preceding version. ([AlibabaCloud][18])
+
+**Pros**
+
+* Very efficient MoE architecture.
+* Open weights.
+* Particularly interesting for mathematics.
+* Much more feasible than enormous 100B+ dense models.
+* Fine-tuning/research potential.
+* Strong alternative to Mistral Small 4.
+
+**Cons**
+
+* Smaller English-language research ecosystem than Llama.
+* Deployment tooling/documentation may require more work.
+* Still needs direct evaluation on your DSP material.
+
+**For your project:** ★★★★★
+**Role:** **One of the most interesting open models to benchmark.**
+
+---
+
+# 22. Gemma 4 31B
+
+**What it is:** Google's 31B dense open model. Gemma 4 is Apache 2.0, multimodal, supports configurable thinking/function calling and gives the larger variants up to 256K context. Google explicitly targets the 31B model at large servers/server clusters. ([Google AI for Developers][19])
+
+**Pros**
+
+* Apache 2.0.
+* Strong reasoning model for its size.
+* Google engineering/tooling.
+* Fine-tunable.
+* Multimodal.
+* Fixed checkpoint is excellent for reproducible research.
+* Hosted version is also available through Gemini API. ([Google AI for Developers][20])
+
+**Cons**
+
+* 31B dense inference is considerably more demanding than smaller MoE designs.
+* Still likely below top closed frontier models.
+* You'll need to manage the model/tool/RAG stack yourself if self-hosting.
+
+**For your project:** ★★★★★
+**Role:** **Very strong open-model candidate.**
+
+---
+
+# 23. Gemma 4 26B A4B
+
+**What it is:** The clever one in the Gemma family: **25.2B total parameters but only about 3.8B active per token**. It is designed to provide much of the capability of a larger model with faster inference, has 256K context and Apache 2.0 licensing. ([Google AI for Developers][19])
+
+**Pros**
+
+* Excellent efficiency/capability balance.
+* Open source Apache 2.0.
+* Reasoning mode.
+* Fine-tunable.
+* Multimodal.
+* Google specifically recommends it as a good starting Gemma model. ([Google AI for Developers][21])
+* Hosted Gemini API option available.
+
+**Cons**
+
+* All 26B parameters still need to be loaded even though only ~4B activate per token. ([Google AI for Developers][22])
+* Probably weaker than Gemma 31B on the hardest problems.
+* More setup than simply calling GPT/Claude.
+
+**For your project:** ★★★★★
+**Role:** **Possibly the most sensible Gemma to actually deploy.**
+
+---
+
+# 24. Gemma 4 12B
+
+**What it is:** Google's mid-sized Gemma 4 model intended for laptops, desktops and small servers. Unlike the larger text/image models, the 12B model also has Google's unified multimodal architecture supporting text, image and audio input. ([Google AI for Developers][19])
+
+**Pros**
+
+* Manageable model size.
+* Apache 2.0.
+* Can self-host.
+* Can fine-tune.
+* Strong candidate for local deployment experiments.
+* Reasoning + multimodal capability.
+
+**Cons**
+
+* Material intelligence drop from 26B/31B.
+* I wouldn't assume it can reliably perform advanced DSP mathematics without extensive evaluation.
+
+**For your project:** ★★★★☆
+**Role:** Excellent local/self-hosted baseline.
+
+---
+
+# So which ones should you *actually* test?
+
+I would **not** run an experiment with all 24. You'd produce a massive pile of results without answering a useful research question.
+
+I'd use **six models**:
+
+| Model                | Why include it                    |
+| -------------------- | --------------------------------- |
+| **GPT-5.6 Terra**    | Strong closed-model baseline      |
+| **Claude Sonnet 5**  | Independent frontier closed model |
+| **Gemini 3.7 Flash** | Cheap frontier API model          |
+| **Mistral Small 4**  | Strong open-source MoE            |
+| **Qwen3.6-35B-A3B**  | Strong math-oriented open MoE     |
+| **Gemma 4 26B A4B**  | Efficient Google open model       |
+
+And I would add **Llama 4 Maverick** if your supervisor wants Llama represented because it is such a well-known open-weight family.
+
+That gives you a genuinely interesting comparison:
+
+> **GPT vs Claude vs Gemini vs Mistral vs Qwen vs Gemma/Llama**
+
+while keeping the **RAG pipeline, system prompt, retrieved documents, tool access and evaluation questions identical**.
+
+### My current hierarchy for your exact use case
+
+**Best raw performance candidates:**
+GPT-5.6 Sol / Claude Opus 5
+
+**Best practical closed models:**
+**GPT-5.6 Terra / Claude Sonnet 5 / Gemini 3.7 Flash**
+
+**Best open models:**
+**Mistral Small 4 / Qwen3.6-35B-A3B / Gemma 4 26B or 31B**
+
+**Best small self-hosted experimental models:**
+Gemma 4 12B / Ministral 14B
+
+**Models I would not choose as the final DSP tutor unless testing proves me wrong:**
+GPT-5.6 Luna / Gemini Flash-Lite / Ministral 3B or 8B.
+
+The really interesting dissertation question therefore isn't necessarily **“Which LLM is best?”** It is closer to:
+
+> **Can a relatively small open-weight model, when grounded in course-specific material and given mathematical verification tools, approach the tutoring performance of a frontier proprietary model?**
+
+That gives you a much stronger reason to investigate Mistral, Qwen, Gemma and Llama rather than simply plugging GPT into a web interface.
+
+[1]: https://developers.openai.com/api/docs/models?utm_source=chatgpt.com "Models | OpenAI API"
+[2]: https://developers.openai.com/api/docs/models/gpt-5.6-terra?utm_source=chatgpt.com "GPT-5.6 Terra Model | OpenAI API"
+[3]: https://developers.openai.com/api/docs/models/gpt-5.6-luna?utm_source=chatgpt.com "GPT-5.6 Luna Model | OpenAI API"
+[4]: https://www.anthropic.com/news/claude-opus-5?src_trk=em67d16f9bd6e9e5.43146414656243079&utm_source=chatgpt.com "Introducing Claude Opus 5 \ Anthropic"
+[5]: https://www.anthropic.com/news/claude-sonnet-5?utm_source=chatgpt.com "Introducing Claude Sonnet 5 \ Anthropic"
+[6]: https://ai.google.dev/gemini-api/docs?utm_source=chatgpt.com "Gemini API  |  Google AI for Developers"
+[7]: https://ai.google.dev/gemini-api/docs/latest-model?hl=en&utm_source=chatgpt.com "What's new in Gemini 3.7 Flash  |  Gemini API  |  Google AI for Developers"
+[8]: https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash?utm_source=chatgpt.com "Gemini 3.6 Flash  |  Gemini API  |  Google AI for Developers"
+[9]: https://ai.google.dev/gemini-api/docs/models?authuser=002&utm_source=chatgpt.com "Models  |  Gemini API  |  Google AI for Developers"
+[10]: https://api-docs.deepseek.com/news/news260424/?utm_source=chatgpt.com "DeepSeek V4 Preview Release | DeepSeek API Docs"
+[11]: https://www.alibabacloud.com/help/en/model-studio/models?utm_source=chatgpt.com "Supported Models and Capabilities Overview - Model Studio - Alibaba Cloud - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center"
+[12]: https://docs.mistral.ai/models/mistral-medium-3-5-26-04?utm_source=chatgpt.com "Mistral Medium 3.5 - Mistral AI | Mistral Docs"
+[13]: https://mistral.ai/news/mistral-small-4/?id=MistralSmall4&utm_source=chatgpt.com "Introducing Mistral Small 4 | Mistral AI"
+[14]: https://docs.mistral.ai/models/mistral-large-3-25-12?utm_source=chatgpt.com "Mistral Large 3 - Mistral AI | Mistral Docs"
+[15]: https://docs.mistral.ai/models?utm_source=chatgpt.com "Mistral Docs"
+[16]: https://docs.mistral.ai/getting-started/models/compare?models=ministral-3-3b-25-12&utm_source=chatgpt.com "Model Selection Guide | Mistral Docs"
+[17]: https://ai.meta.com/llama/get-started/?utm_source=chatgpt.com "Developer Docs & Resources | Meta"
+[18]: https://www.alibabacloud.com/help/en/model-studio/qwen3-6-35b-a3b?utm_source=chatgpt.com "qwen3.6-35b-a3b Model Info - - Alibaba Cloud Documentation Center"
+[19]: https://ai.google.dev/gemma/docs/core/model_card_4?utm_source=chatgpt.com "Gemma 4 model card  |  Google AI for Developers"
+[20]: https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api?utm_source=chatgpt.com "Run Gemma with the Gemini API  |  Google AI for Developers"
+[21]: https://ai.google.dev/gemma/docs/get_started?utm_source=chatgpt.com "Get started with Gemma models  |  Google AI for Developers"
+[22]: https://ai.google.dev/gemma/docs/core?authuser=50&utm_source=chatgpt.com "Gemma 4 model overview  |  Google AI for Developers"

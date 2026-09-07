@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ym07"
+version = "0.1.0"
+description = "YM-07 course tutor — benchmark harness for EEE4114F"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# The open-weights arm. Not installed by default: the harness must stay
+# installable on a laptop with no GPU, which is where the hosted arm is driven
+# from. Install on the GPU machine with:  pip install -e '.[local]'
+#
+# On a 50-series (Blackwell, sm_120) card, torch must come from the CUDA 12.8+
+# index or it will have no kernels for the GPU:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+local = [
+    "torch>=2.7",
+    "transformers>=4.51",
+    "accelerate>=1.0",
+    "bitsandbytes>=0.45",
+]
+
+[project.scripts]
+ym07 = "ym07.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
