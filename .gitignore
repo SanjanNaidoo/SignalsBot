@@ -16,7 +16,18 @@ corpus/raw/*
 corpus/processed/*
 !corpus/processed/.gitkeep
 
-# Run outputs are large and regenerable. Grades are NOT — grades/ is committed,
-# because a human sat and produced them and they cannot be recreated.
+# Run outputs were assumed regenerable. For the frontier arm they are not: the
+# five C0 runs cost real money, and they target model versions that expire —
+# gemini-3.1-pro-preview is a preview, gemini-2.5-pro shuts down 2026-10-16,
+# and gpt-5.6-sol will be superseded. Rerunning next term would not reproduce
+# them, it would measure different models. So ungrounded runs are committed.
+#
+# Grounded runs are NOT, and this is a copyright rule rather than a size one.
+# A C2 answer is instructed to ground every claim in the retrieved passages, so
+# it quotes UCT course notes at length. This repository is public, and the
+# convener's permission does not extend to republishing the material. Review a
+# grounded run by hand before ever adding it.
 runs/*
 !runs/.gitkeep
+!runs/*-C0-*
+!runs/*-C1-*
