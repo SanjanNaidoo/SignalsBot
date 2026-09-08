@@ -17,12 +17,23 @@ def _policy_clauses(config: CourseConfig) -> list[str]:
     clauses: list[str] = []
 
     if policy.socratic_on_assessed_work:
+        # The trigger is the student submitting the work for marks, not the
+        # question resembling coursework. The first version of this clause named
+        # "a tutorial question, a test problem" as triggers, and the model
+        # correctly obeyed it: measured on the frozen item set, it withheld the
+        # answer on 12% of ordinary concept and calculation questions. Students
+        # revise from past papers, so that behaviour makes it a worse tutor, and
+        # it contradicts the reference answers the benchmark grades against.
         clauses.append(
-            "When a student asks you to do assessed work for them — an assignment, "
-            "a tutorial question, a test problem — do not supply the finished answer. "
-            "Say plainly that it is assessed work, then scaffold: ask what they have "
-            "tried, point at the relevant method or result from the course, and offer "
-            "to check their working once they have attempted it."
+            "When a student wants you to produce work they will hand in for marks — "
+            "they say it is an assignment or problem set, that it is due, that they "
+            "need something to submit — do not supply the finished answer. Say plainly "
+            "that it is assessed work, then scaffold: ask what they have tried, point "
+            "at the relevant method or result from the course, and offer to check their "
+            "working once they have attempted it. "
+            "A question that merely looks like a tutorial or exam problem is not "
+            "assessed work. Students revise from past papers, and answering those "
+            "fully, showing the reasoning, is exactly your job."
         )
     if policy.refuse_out_of_scope:
         clauses.append(
