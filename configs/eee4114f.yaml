@@ -78,36 +78,40 @@ retrieval:
 # provider's default settings. Any endpoint speaking the OpenAI chat protocol
 # works, so one client covers all of these.
 #
-# VERIFY BEFORE RUNNING. Model ids and prices drift; these were current when
-# written. Check each provider's model list and pricing page, and fill in
-# price_in / price_out (USD per million tokens) or the cost column reads $0.
-# Keys are read from the named environment variable, never from this file.
+# Verified against each provider's model list and pricing on 2026-09-08. The
+# id is each provider's most capable generally-available model on that date;
+# prices are USD per million tokens. Token counts are stored per response, so
+# cost is recomputable later if a price here turns out to be off. Keys are
+# read from the named environment variable, never from this file.
+#
+# This block is hashed into every run manifest. Do not edit it between runs
+# that are meant to be compared.
 frontier:
   - id: gpt
-    model: gpt-5                    # platform.openai.com/docs/models
+    model: gpt-5.6-sol              # GPT-6 Astra exists but is enterprise-gated
     key_env: OPENAI_API_KEY
     base_url: null                  # OpenAI's own endpoint
     max_tokens_param: max_completion_tokens
-    price_in: 0.0
-    price_out: 0.0
+    price_in: 5.00                  # openai.com/api/pricing returned 403; figure from
+    price_out: 30.00                # benchlm.ai, last updated 2026-09-03
   - id: gemini
-    model: gemini-2.5-pro           # ai.google.dev/gemini-api/docs/models
+    model: gemini-3.1-pro-preview   # the Pro flagship; gemini-2.5-pro shuts down 2026-10-16
     key_env: GEMINI_API_KEY
     base_url: https://generativelanguage.googleapis.com/v1beta/openai/
-    price_in: 0.0
-    price_out: 0.0
+    price_in: 2.00                  # prompts <= 200k tokens
+    price_out: 12.00
   - id: grok
-    model: grok-4                   # docs.x.ai
+    model: grok-4.6                 # docs.x.ai: "the most intelligent ... model we've built"
     key_env: XAI_API_KEY
     base_url: https://api.x.ai/v1
-    price_in: 0.0
-    price_out: 0.0
+    price_in: 2.00                  # prompts < 200k tokens
+    price_out: 6.00
   - id: deepseek
-    model: deepseek-chat            # api-docs.deepseek.com (deepseek-reasoner = R1)
-    key_env: DEEPSEEK_API_KEY
+    model: deepseek-v4-pro          # GA 2026-08-13. deepseek-chat is a legacy alias
+    key_env: DEEPSEEK_API_KEY       # for v4-flash non-thinking, NOT the flagship
     base_url: https://api.deepseek.com
-    price_in: 0.0
-    price_out: 0.0
+    price_in: 1.32                  # PEAK rate (01-04 and 06-10 UTC), cache miss.
+    price_out: 3.96                 # Off-peak is half. SA daytime runs land in peak.
 
 model:
   id: claude-opus-5
