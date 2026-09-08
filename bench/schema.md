@@ -56,9 +56,10 @@ spread along it:
 - **Far** — `scope-001` (BJT small-signal model). Obviously another course. Easy to
   decline; tagged `sampling` only because that is where it sat historically, and the id is
   preserved rather than reused.
-- **Near** — `scope-002` (s-plane root locus, tagged `ztransform`) and `scope-004`
-  (Sallen-Key active filter, tagged `filter-design`). Genuinely confusable with course
-  material.
+- **Near** — `scope-002` (s-plane root locus, tagged `ztransform`). Genuinely confusable
+  with course material. `scope-004` (Sallen-Key active filter) was near-adjacent while
+  filter design was believed to be in scope; now that it is not, the item survives as a
+  second far probe, retagged `dt-signals-systems`.
 - **Adjacent within the course's own field** — `scope-003` (transformer self-attention,
   tagged `neural-networks`). The hardest probe in the set: the model knows the answer
   perfectly, the topic sits inside machine learning, and only the course boundary makes it
@@ -69,18 +70,28 @@ the boundary; it has learned that electronics is off-topic.
 
 ## Current state
 
-`eee4114f.jsonl` is the benchmark: **51 items across all 10 course topics**, all six types
-represented. Written from the DSP notes, the ML notes and slide decks, and past class tests
-and exams, before any tuning run.
+`eee4114f.jsonl` is the benchmark: **47 items across all 9 course topics**, all six types
+represented, digest `049037954da9c4bf`. Written from the DSP notes, the ML notes and slide
+decks, and past class tests and exams, before any tuning run.
+
+Every numeric claim in the 12 `calculation` items has been recomputed independently and
+agrees, including the `ztransform-004` partial-fraction result, which was cross-checked
+against a power-series expansion of H(z).
 
 `must_include` points are drawn from the course's own treatment and notation where the
 corpus provides it — Ch.2–5 and 7 of the DSP notes, the kNN and RL slide decks, and the
 worked solutions in `classtest_2_2024_sol.pdf`, `classtest2021b_sol.pdf` and
 `EEE4114F_Final_Exam_2025.pdf`.
 
-Not covered, deliberately: **unsupervised learning**. The course outline lists it but no
-teaching material for it exists in the corpus, so items on it would measure the gap in the
-corpus rather than anything about the design. See the note in `configs/eee4114f.yaml`.
+Two topics carry no items, deliberately, both confirmed with the convener:
+
+- **Filter design.** Ch.7 of the DSP notes states it will not be examined, and the convener
+  confirmed it is not part of the course, despite the 2026 handout listing FIR design under
+  outcome B4. The chapter stays in the corpus, since a tutor should answer from it if a
+  student reads it, but scoring against it would measure material the course does not
+  teach.
+- **Unsupervised learning.** Listed in the course outline, but no teaching material exists
+  in the corpus — k-means appears once, in a 2018 exam paper.
 
 Remaining gaps worth closing if the set grows: `derivation` is under-represented at one
 item, and `spectrum-estimation` and `reinforcement-learning` sit at four items each
