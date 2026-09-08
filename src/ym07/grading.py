@@ -209,10 +209,12 @@ def grade_interactively(
             print(f"  -> correctness {grade.correctness:.2f}"
                   f"{', HARD FAIL' if grade.hard_fail else ''}")
 
-        print(f"\n  (System labels for {item.id}: "
-              + ", ".join(
-                  f"{chr(ord('A') + i)}={r['condition']}" for i, r in enumerate(responses)
-              )
-              + ")\n")
+        # The system labels are deliberately NOT revealed here. Printing them
+        # after each item kept the grading of that item blind but leaked the
+        # mapping into every item after it: over 47 items a grader learns which
+        # system is the terse one and which is the verbose one, and recognises
+        # it thereafter. The mapping is already recorded against every
+        # response_id in grades.jsonl, so nothing is lost by staying silent.
+        print()
 
     return graded
