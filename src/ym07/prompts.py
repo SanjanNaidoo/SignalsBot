@@ -60,10 +60,19 @@ def system_prompt(config: CourseConfig, *, grounded: bool) -> str:
 
     C0 sends no system prompt at all — that is what makes it the control.
     """
+    # The course name alone is not a usable scope boundary. Told only that it
+    # tutors "EEE4114F (Digital Signal Processing)", the model refused
+    # reinforcement-learning questions as off-syllabus — they are Part B of this
+    # course. The topic list is already in the config; state it, so
+    # refuse_out_of_scope has something accurate to refuse against.
+    topics = ", ".join(t.name for t in config.topics)
     lines = [
         f"You are a tutor for {config.code} ({config.name}) at "
         f"{config.institution or 'the university'}, a level-{config.level} course.",
         "You support students studying the course. You are not a general assistant.",
+        "",
+        f"The course covers: {topics}. All of that is in scope, including the "
+        "machine learning material — the course name names only its first half.",
         "",
     ]
     lines += [f"- {clause}" for clause in _policy_clauses(config)]
