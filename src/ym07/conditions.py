@@ -110,7 +110,10 @@ TOPK = Condition(
 #
 # Effort is recorded as "n/a": these models have no thinking-effort knob, and a
 # manifest claiming effort=high for a run where nothing thought would be a lie.
-OSS_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+# The pre-quantized checkpoint, not the bf16 one. Quantizing on load
+# materialises the full-precision weights in system RAM first, which does not
+# fit in 16 GB; this variant streams 4-bit weights straight to the GPU.
+OSS_MODEL = "unsloth/Qwen2.5-7B-Instruct-bnb-4bit"
 
 # The fine-tuned checkpoint. Does not exist until the training run has produced
 # it; the condition is declared here so the experiment design is legible now.

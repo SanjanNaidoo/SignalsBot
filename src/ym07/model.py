@@ -210,7 +210,10 @@ class LocalClient:
             return self._loaded[model_id]
 
         kwargs: dict = {"dtype": "auto", "device_map": "auto"}
-        if self.load_in_4bit:
+        # A checkpoint that is already 4-bit carries its own quantization config;
+        # supplying a second one conflicts with it.
+        prequantized = "4bit" in model_id.lower() or "bnb" in model_id.lower()
+        if self.load_in_4bit and not prequantized:
             from transformers import BitsAndBytesConfig
 
             kwargs["quantization_config"] = BitsAndBytesConfig(
