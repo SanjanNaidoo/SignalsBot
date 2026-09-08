@@ -63,6 +63,26 @@ class Model:
 
 
 @dataclass(frozen=True)
+class Frontier:
+    """An external frontier model for the cross-model ungrounded baseline.
+
+    Model ids, endpoints, key names and prices all change often, and none of
+    them is a design choice of this project — which is why they live here and
+    not in code. Any endpoint that speaks the OpenAI chat-completions protocol
+    works: OpenAI itself, DeepSeek, xAI, and Google's Gemini compatibility URL.
+    """
+
+    id: str
+    model: str
+    key_env: str                            # environment variable holding the key
+    provider: str = "openai"                # the protocol, not the company
+    base_url: str | None = None             # None = the OpenAI default endpoint
+    price_in: float = 0.0                   # USD per million input tokens
+    price_out: float = 0.0                  # USD per million output tokens
+    max_tokens_param: str = "max_tokens"    # OpenAI's newer models want max_completion_tokens
+
+
+@dataclass(frozen=True)
 class CourseConfig:
     code: str
     name: str
@@ -73,6 +93,7 @@ class CourseConfig:
     policy: Policy
     retrieval: Retrieval
     model: Model
+    frontier: tuple[Frontier, ...]
     path: Path
     digest: str = field(compare=False, default="")
 
@@ -85,6 +106,16 @@ class CourseConfig:
             if t.id == topic_id:
                 return t.name
         return topic_id
+
+    def frontier_by_id(self, frontier_id: str) -> Frontier:
+        for f in self.frontier:
+            if f.id == frontier_id:
+                return f
+        raise KeyError(
+            f"{self.path}: no `frontier:` entry with id '{frontier_id}'. The "
+            f"C0-{frontier_id} condition needs one — see the frontier block in the "
+            "course config."
+        )
 
 
 def load_config(path: str | Path) -> CourseConfig:
@@ -112,6 +143,20 @@ def load_config(path: str | Path) -> CourseConfig:
     if not topics:
         raise ValueError(f"{path}: at least one topic is required")
 
+    frontier = tuple(
+        Frontier(
+            id=f["id"],
+            model=f["model"],
+            key_env=f["key_env"],
+            provider=f.get("provider", "openai"),
+            base_url=f.get("base_url"),
+            price_in=float(f.get("price_in") or 0.0),
+            price_out=float(f.get("price_out") or 0.0),
+            max_tokens_param=f.get("max_tokens_param", "max_tokens"),
+        )
+        for f in raw.get("frontier") or []
+    )
+
     return CourseConfig(
         code=course["code"],
         name=course.get("name", course["code"]),
@@ -122,6 +167,7 @@ def load_config(path: str | Path) -> CourseConfig:
         policy=Policy(**(raw.get("policy") or {})),
         retrieval=Retrieval(**(raw.get("retrieval") or {})),
         model=Model(**(raw.get("model") or {})),
+        frontier=frontier,
         path=path,
         digest=hashlib.sha256(raw_bytes).hexdigest()[:16],
     )

@@ -43,6 +43,21 @@ model tier, lower thinking effort, fewer retrieved chunks
 `C2-oss` exists so that any gain from `C2-oss-tuned` can be attributed to the fine-tuning
 rather than to the retrieval. Without it the headline number is uninterpretable.
 
+**Cross-model ungrounded baseline** (`C0-gpt`, `C0-gemini`, `C0-grok`, `C0-deepseek`)
+
+The same bare question — no system prompt, no retrieval — sent to other frontier models at
+each provider's *default* settings, via their APIs. This is what a student gets by pasting
+the question into a chat box. It is run through the API rather than the web interface
+because every web interface wraps the question in the vendor's own hidden system prompt
+and may invoke tools; only the API call is unprompted, and only the API call can be
+recorded exactly.
+
+It answers a question the single-model `C0-baseline` cannot: which frontier model is the
+strongest ungrounded baseline. That bounds how much of the C1/C2 gap is the course prompt
+and the corpus, versus simply the choice of model. If another model's bare answer already
+beats the grounded Claude pipeline, the project's contribution is smaller than it looks,
+and the report must say so.
+
 The open arm is greedy-decoded with a fixed seed, so it is exactly reproducible. The
 hosted arm is not — those models expose no temperature — so its run-to-run spread is
 measured with `--repeats 3` instead of assumed away.

@@ -56,8 +56,10 @@ Common targets:
 | `make report` | Aggregate graded runs into tables | no |
 | `make clean` | Delete run outputs (grades are kept) | no |
 
-Real runs on the hosted arm need `ANTHROPIC_API_KEY` in the environment. Everything else
-works offline.
+Real runs on the hosted arm need `ANTHROPIC_API_KEY` in the environment. The cross-model
+baseline (`make frontier`) needs `OPENAI_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY` and
+`DEEPSEEK_API_KEY` — each condition needs only its own key, so run whichever you have.
+Everything else works offline.
 
 The open-weights arm needs a CUDA GPU and is set up separately — see
 [LOCAL-ARM.md](LOCAL-ARM.md). It costs nothing per run, so prompt and benchmark defects

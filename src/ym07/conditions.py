@@ -23,11 +23,16 @@ class Condition:
     provider: str | None = None      # None = use the config's provider
     effort: str | None = None        # None = use the config's effort
     top_k: int | None = None         # None = use the config's top_k
+    frontier_id: str | None = None   # set = model/provider come from config `frontier:`
 
     def resolved_model(self, config: CourseConfig) -> str:
+        if self.frontier_id:
+            return config.frontier_by_id(self.frontier_id).model
         return self.model_id or config.model.id
 
     def resolved_provider(self, config: CourseConfig) -> str:
+        if self.frontier_id:
+            return config.frontier_by_id(self.frontier_id).provider
         return self.provider or config.model.provider
 
     def resolved_effort(self, config: CourseConfig) -> str:
@@ -176,11 +181,49 @@ OSS_TUNED = Condition(
     effort="n/a",
 )
 
+# ---------------------------------------------------------------------------
+# The cross-model ungrounded baseline.
+#
+# The same bare question — no system prompt, no retrieval — sent to other
+# frontier models at each provider's default settings. It is what a student
+# gets by pasting the question into a chat box, and it answers a question the
+# single-model C0 cannot: which frontier model is the strongest ungrounded
+# baseline? That bounds how much of the C1/C2 gap is the course prompt and the
+# corpus, versus simply the choice of model.
+#
+# Effort is recorded as "default" because that is what was used. Every provider
+# defaults differently, and overriding it would measure our settings rather
+# than their model.
+#
+# Model ids, endpoints, key names and prices live in configs/<course>.yaml
+# under `frontier:`. To add a model, add it there AND to this tuple.
+FRONTIER_IDS = ("gpt", "gemini", "grok", "deepseek")
+
+
+def _frontier_baseline(frontier_id: str) -> Condition:
+    return Condition(
+        name=f"C0-{frontier_id}",
+        description=f"Frontier model '{frontier_id}', no retrieval, no course prompt",
+        purpose=(
+            "Pairs with C0-baseline across providers. If another model's bare "
+            "answer already beats the grounded Claude pipeline, the project's "
+            "contribution is smaller than it looks — and the report must say so."
+        ),
+        use_course_prompt=False,
+        use_retrieval=False,
+        frontier_id=frontier_id,
+        effort="default",
+    )
+
+
+FRONTIER_BASELINES = tuple(_frontier_baseline(f) for f in FRONTIER_IDS)
+
 CONDITIONS: dict[str, Condition] = {
     c.name: c
     for c in (
         BASELINE, PROMPTED, RAG, MONEY, EFFORT, TOPK,
         OSS_BASELINE, OSS_PROMPTED, OSS_RAG, OSS_TUNED,
+        *FRONTIER_BASELINES,
     )
 }
 

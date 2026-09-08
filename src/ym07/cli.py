@@ -60,9 +60,13 @@ def cmd_conditions(args) -> int:
     config = load_config(args.config)
     for name in sorted(CONDITIONS):
         condition = CONDITIONS[name]
+        try:
+            model = condition.resolved_model(config)
+        except KeyError:
+            model = f"(no `frontier:` entry '{condition.frontier_id}' in config)"
         print(f"{name}")
         print(f"  {condition.description}")
-        print(f"  model={condition.resolved_model(config)} "
+        print(f"  model={model} "
               f"effort={condition.resolved_effort(config)} "
               f"prompt={'yes' if condition.use_course_prompt else 'no'} "
               f"retrieval={'top_k=' + str(condition.resolved_top_k(config)) if condition.use_retrieval else 'no'}")
@@ -106,9 +110,17 @@ def cmd_run(args) -> int:
 
     def client_for(condition) -> object:
         provider = condition.resolved_provider(config)
-        if provider not in clients:
-            clients[provider] = build_client(args.dry_run, provider, config)
-        return clients[provider]
+        entry = config.frontier_by_id(condition.frontier_id) if condition.frontier_id else None
+        key = f"{provider}:{entry.id}" if entry else provider
+        if key not in clients:
+            if entry and not args.dry_run and not (entry.price_in or entry.price_out):
+                print(
+                    f"  note: no prices set for '{entry.id}' ({entry.model}); the cost "
+                    "column will read $0 until price_in/price_out are filled in the config.",
+                    file=sys.stderr,
+                )
+            clients[key] = build_client(args.dry_run, provider, config, entry)
+        return clients[key]
 
     if args.dry_run:
         print("DRY RUN — no model will be called and no money will be spent.\n")

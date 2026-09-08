@@ -278,6 +278,73 @@ class LocalClient:
         )
 
 
+class OpenAICompatibleClient:
+    """Any endpoint that speaks the OpenAI chat-completions protocol.
+
+    Covers OpenAI itself and the providers that expose the same protocol —
+    DeepSeek, xAI, Google's Gemini compatibility endpoint — which is why one
+    class is enough for the whole cross-model baseline. Which endpoint, which
+    model and which key come from the `frontier:` block of the course config.
+
+    Sends the question at the provider's default settings: no temperature, no
+    reasoning-effort knob, and no system prompt unless a condition supplies one.
+    That is deliberate. The baseline is "what a student gets by pasting the
+    question in", and every provider defaults differently; overriding those
+    defaults would measure our settings, not their model.
+    """
+
+    def __init__(self, entry, max_retries: int = 3):
+        import os
+
+        import openai
+
+        key = os.environ.get(entry.key_env)
+        if not key:
+            raise RuntimeError(
+                f"{entry.key_env} is not set. The C0-{entry.id} condition sends the "
+                f"question to '{entry.model}' and needs that key in the environment."
+            )
+        self._openai = openai
+        self._entry = entry
+        self._client = openai.OpenAI(
+            api_key=key, base_url=entry.base_url, max_retries=max_retries
+        )
+        # The manifest's cost column reads from PRICING. Register this model's
+        # rates so the number is reported rather than silently zero.
+        PRICING[entry.model] = (entry.price_in, entry.price_out)
+
+    def answer(self, *, system, user, model, max_tokens, effort) -> Answer:
+        started = time.monotonic()
+        messages = ([{"role": "system", "content": system}] if system else [])
+        messages.append({"role": "user", "content": user})
+        kwargs: dict = {"model": model, "messages": messages}
+        kwargs[self._entry.max_tokens_param] = max_tokens
+
+        try:
+            response = self._client.chat.completions.create(**kwargs)
+        except self._openai.APIStatusError as exc:
+            return _failed(model, effort, started, f"api error {exc.status_code}: {exc}")
+        except self._openai.APIConnectionError as exc:
+            return _failed(model, effort, started, f"connection error: {exc}")
+
+        choice = response.choices[0]
+        message = choice.message
+        refusal = getattr(message, "refusal", None)
+        text = message.content or refusal or ""
+        usage = response.usage
+        return Answer(
+            text=text,
+            model=model,
+            effort=effort,
+            stop_reason=choice.finish_reason,
+            refusal_category="refusal" if refusal else None,
+            input_tokens=getattr(usage, "prompt_tokens", 0) or 0,
+            output_tokens=getattr(usage, "completion_tokens", 0) or 0,
+            cached_input_tokens=0,
+            latency_s=round(time.monotonic() - started, 3),
+        )
+
+
 def _failed(model: str, effort: str, started: float, error: str) -> Answer:
     return Answer(
         text="",
@@ -293,8 +360,8 @@ def _failed(model: str, effort: str, started: float, error: str) -> Answer:
     )
 
 
-def build_client(dry_run: bool, provider: str = "anthropic", config=None):
-    """One client per provider. Conditions in the same run may need different ones."""
+def build_client(dry_run: bool, provider: str = "anthropic", config=None, frontier=None):
+    """One client per provider (per endpoint, for the frontier baselines)."""
     if dry_run:
         return DryRunClient()
     if provider == "local":
@@ -307,4 +374,8 @@ def build_client(dry_run: bool, provider: str = "anthropic", config=None):
         )
     if provider == "anthropic":
         return ClaudeClient()
-    raise ValueError(f"Unknown provider '{provider}'. Known: anthropic, local")
+    if provider == "openai":
+        if frontier is None:
+            raise ValueError("the openai provider needs a `frontier:` config entry")
+        return OpenAICompatibleClient(frontier)
+    raise ValueError(f"Unknown provider '{provider}'. Known: anthropic, local, openai")

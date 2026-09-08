@@ -52,6 +52,9 @@ sweep: setup  ## REAL RUN: every condition, for the full results table
 variance: setup  ## REAL RUN: C0 three times, to measure run-to-run spread
 	@$(YM07) run C0-baseline --repeats 3
 
+frontier: setup  ## REAL RUN: the bare question to every other frontier model (needs their keys)
+	@$(YM07) run C0-gpt C0-gemini C0-grok C0-deepseek
+
 # --------------------------------------------------------------------------
 
 grade: setup  ## Blind-grade collected responses (interactive, resumable)

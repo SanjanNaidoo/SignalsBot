@@ -122,6 +122,10 @@ def run_condition(
         "item_count": len(item_set),
         "model": model_id,
         "provider": condition.resolved_provider(config),
+        "endpoint": (
+            (config.frontier_by_id(condition.frontier_id).base_url or "provider default")
+            if condition.frontier_id else None
+        ),
         "effort": effort,
         "max_tokens": config.model.max_tokens,
         "use_course_prompt": condition.use_course_prompt,

@@ -73,6 +73,42 @@ retrieval:
   chunk_overlap_tokens: 150
   top_k: 8
 
+# Other frontier models, for the cross-model ungrounded baseline (C0-<id>).
+# Each receives the bare question - no system prompt, no retrieval - at the
+# provider's default settings. Any endpoint speaking the OpenAI chat protocol
+# works, so one client covers all of these.
+#
+# VERIFY BEFORE RUNNING. Model ids and prices drift; these were current when
+# written. Check each provider's model list and pricing page, and fill in
+# price_in / price_out (USD per million tokens) or the cost column reads $0.
+# Keys are read from the named environment variable, never from this file.
+frontier:
+  - id: gpt
+    model: gpt-5                    # platform.openai.com/docs/models
+    key_env: OPENAI_API_KEY
+    base_url: null                  # OpenAI's own endpoint
+    max_tokens_param: max_completion_tokens
+    price_in: 0.0
+    price_out: 0.0
+  - id: gemini
+    model: gemini-2.5-pro           # ai.google.dev/gemini-api/docs/models
+    key_env: GEMINI_API_KEY
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    price_in: 0.0
+    price_out: 0.0
+  - id: grok
+    model: grok-4                   # docs.x.ai
+    key_env: XAI_API_KEY
+    base_url: https://api.x.ai/v1
+    price_in: 0.0
+    price_out: 0.0
+  - id: deepseek
+    model: deepseek-chat            # api-docs.deepseek.com (deepseek-reasoner = R1)
+    key_env: DEEPSEEK_API_KEY
+    base_url: https://api.deepseek.com
+    price_in: 0.0
+    price_out: 0.0
+
 model:
   id: claude-opus-5
   # Output cap per answer. Adaptive thinking is on by default on Opus 5 and its
