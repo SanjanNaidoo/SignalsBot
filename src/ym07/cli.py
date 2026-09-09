@@ -127,6 +127,17 @@ def cmd_run(args) -> int:
     if args.dry_run:
         print("DRY RUN — no model will be called and no money will be spent.\n")
 
+    # Parallel workers exist to overlap network latency on the hosted arms. A
+    # local model has no latency to hide: one GPU serves one generation at a
+    # time, and concurrent calls each allocate their own KV cache, so extra
+    # workers buy nothing and can exhaust VRAM.
+    workers = args.workers
+    if any(get_condition(n).resolved_provider(config) == "local" for n in args.conditions):
+        if workers != 1:
+            print(f"  note: local model — using 1 worker instead of {workers}; "
+                  "concurrency does not help a single GPU.\n", file=sys.stderr)
+        workers = 1
+
     for name in args.conditions:
         base = get_condition(name)
         for index in range(1, args.repeats + 1):
@@ -140,7 +151,7 @@ def cmd_run(args) -> int:
                     client=client_for(condition),
                     retriever=retriever,
                     runs_dir=Path(args.runs),
-                    workers=args.workers,
+                    workers=workers,
                     dry_run=args.dry_run,
                 )
             except MissingCorpusError as exc:

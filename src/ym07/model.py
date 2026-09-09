@@ -9,6 +9,7 @@ in the report.
 
 from __future__ import annotations
 
+import threading
 import time
 from dataclasses import dataclass, asdict
 
@@ -228,11 +229,24 @@ class LocalClient:
         self.temperature = temperature
         self.seed = seed
         self._loaded: dict[str, tuple] = {}
+        # Without this, concurrent callers all miss the cache at once and each
+        # starts loading its own copy of a multi-gigabyte model, exhausting
+        # memory before any of them finishes.
+        self._load_lock = threading.Lock()
 
     def _load(self, model_id: str) -> tuple:
-        """Load and cache. Weights are big and conditions share them."""
+        """Load once and cache. Weights are big and conditions share them."""
         if model_id in self._loaded:
             return self._loaded[model_id]
+
+        with self._load_lock:
+            # Re-check inside the lock: several threads can pass the check above
+            # before the first acquires it.
+            if model_id in self._loaded:
+                return self._loaded[model_id]
+            return self._load_locked(model_id)
+
+    def _load_locked(self, model_id: str) -> tuple:
 
         kwargs: dict = {"dtype": "auto", "device_map": "auto"}
         # A checkpoint that is already 4-bit carries its own quantization config;
