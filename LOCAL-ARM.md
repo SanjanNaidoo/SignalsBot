@@ -22,13 +22,24 @@ To paste into it: **right-click** — Ctrl+V often does not work there.
 
 ---
 
-## Step 1 — Install Python
+## Step 1 — Install Python 3.12, and specifically 3.12
 
-Go to **python.org/downloads** and get **Python 3.12** (not 3.13 — some of the libraries
-we need do not publish 3.13 builds yet).
+**The version matters more than anything else in this guide.** PyTorch publishes no
+GPU builds for Python 3.13 or 3.14. On those versions the install silently gives you a
+CPU-only PyTorch, which then fails with a baffling `cannot import name
+'NP_SUPPORTED_MODULES'` error that looks like a broken project but is really a version
+mismatch. Even if it loaded, it would ignore your GPU entirely.
+
+The big yellow **Download Python** button on python.org gives you the *newest* release.
+Do not use it. Instead:
+
+1. Go to **python.org/downloads/windows**
+2. Find the newest entry beginning **Python 3.12** — for example *Python 3.12.10*
+3. Click its **Download Windows installer (64-bit)** link
+4. Run it
 
 > **Do not install Python from the Microsoft Store.** That version is sandboxed and breaks
-> the virtual environment we create in step 4. Use the installer from python.org.
+> the virtual environment we create in step 4.
 
 In the installer, on the very first screen:
 
@@ -40,10 +51,14 @@ Then click *Install Now*.
 Check it worked — close PowerShell, open a fresh one, and run:
 
 ```powershell
-py --version
+py -3.12 --version
 ```
 
 Expected: `Python 3.12.x`
+
+Having other Python versions installed alongside is fine; they do not interfere. That is
+why every command below says `py -3.12` rather than `py` — it picks the right one
+explicitly.
 
 ---
 
@@ -83,7 +98,7 @@ before continuing, because nothing below will work.
 cd $HOME\Documents
 git clone https://github.com/SanjanNaidoo/SignalsBot.git
 cd SignalsBot
-py -m venv .venv
+py -3.12 -m venv .venv
 ```
 
 That last command makes a private Python environment inside the project, so nothing we
@@ -121,13 +136,19 @@ This downloads roughly 2.5 GB. It will take a while.
 **Now verify, and do not continue until this passes:**
 
 ```powershell
-.venv\Scripts\python.exe -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+.venv\Scripts\python.exe -c "import torch; print(torch.__version__, '|', torch.version.cuda, '|', torch.cuda.is_available())"
 ```
 
-Expected: `True NVIDIA GeForce RTX 5070 Ti`
+Expected something like: `2.7.0+cu128 | 12.8 | True`
 
-If it prints `False`, the GPU is not visible to PyTorch. See Troubleshooting — do not carry
-on, because every later step depends on this.
+Three things to check in that line:
+
+- the version ends **`+cu128`** — no suffix means a CPU-only build
+- the middle value is a **CUDA version**, not `None`
+- it ends **`True`**
+
+If any of those is wrong, stop. See Troubleshooting. Every later step depends on this, and
+carrying on produces confusing errors that look unrelated.
 
 ---
 
@@ -224,13 +245,40 @@ re-running the ingestion guarantees both machines retrieve from byte-identical t
 Python with the *Add python.exe to PATH* box ticked, and always reopen PowerShell after an
 install; an already-open window keeps the old settings.
 
+**`cannot import name 'NP_SUPPORTED_MODULES' from 'torch._dynamo.utils'`** — the classic
+symptom of a CPU-only PyTorch sitting next to a `transformers` that expects the CUDA one.
+Almost always caused by building the environment on Python 3.13 or 3.14, for which no GPU
+wheels exist. Reinstalling the extra will not help. Fix it by rebuilding on 3.12:
+
+```powershell
+cd $HOME\Documents\SignalsBot
+Remove-Item -Recurse -Force .venv
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu128
+.venv\Scripts\python.exe -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())"
+.venv\Scripts\python.exe -m pip install -e ".[local]"
+```
+
+Deleting `.venv` throws away only downloaded libraries. Your work, the questions and any
+runs are untouched.
+
 **`torch.cuda.is_available()` prints `False`** — either the driver is older than CUDA 12.8
-(check `nvidia-smi`), or the wrong PyTorch got installed. To redo it:
+(check `nvidia-smi`), or a CPU-only PyTorch got installed. Check which:
+
+```powershell
+.venv\Scripts\python.exe -c "import torch; print(torch.__version__, torch.version.cuda)"
+```
+
+`torch.version.cuda` printing `None` means a CPU build. Redo it:
 
 ```powershell
 .venv\Scripts\python.exe -m pip uninstall -y torch
 .venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu128
 ```
+
+If that reports *no matching distribution*, your Python version has no GPU wheels — check
+`.venv\Scripts\python.exe --version` and rebuild on 3.12 as above.
 
 **`no kernel image is available for execution on the device`** — same cause: PyTorch
 without Blackwell support. Fix as above.

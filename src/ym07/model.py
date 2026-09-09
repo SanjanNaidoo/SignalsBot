@@ -186,14 +186,39 @@ class LocalClient:
             import torch
             from transformers import AutoModelForCausalLM, AutoTokenizer
         except ImportError as exc:  # pragma: no cover - depends on the machine
+            # Distinguish "not installed" from "installed but mutually
+            # incompatible". Blaming a missing extra when the real problem is a
+            # version clash sends people to reinstall what they already have.
+            if exc.name in (None, "torch", "transformers"):
+                hint = (
+                    "torch and transformers are not installed. Install the "
+                    'optional extra:  pip install -e ".[local]"'
+                )
+            else:
+                hint = (
+                    "torch and transformers are both installed but disagree with "
+                    "each other. This is a version mismatch, not a missing "
+                    "package, and reinstalling the extra will not fix it.\n"
+                    "The usual cause is a Python version that has no CUDA build "
+                    "of torch — there are none for Python 3.14 — which silently "
+                    "leaves a CPU-only wheel that transformers does not match. "
+                    "Rebuild the environment on Python 3.12."
+                )
+            raise RuntimeError(f"The local provider could not start.\n{hint}\n"
+                               f"(import failed: {exc})") from exc
+
+        if not torch.cuda.is_available():  # pragma: no cover - depends on the machine
             raise RuntimeError(
-                "The local provider needs the optional extra: "
-                "pip install -e '.[local]'\n"
-                "On a 50-series card this must be a CUDA 12.8+ build of torch — "
-                "the stock PyPI wheel has no kernels for sm_120 and will fail at "
-                "load time.\n"
-                f"(import failed: {exc})"
-            ) from exc
+                "torch is installed but reports no CUDA device, so this would run "
+                "on the CPU: a 7B model would take hours per question and would "
+                "not be the experiment the report describes.\n"
+                "Either the driver is older than CUDA 12.8, or the installed torch "
+                "is a CPU-only build. Check with:\n"
+                '  python -c "import torch; print(torch.__version__, '
+                'torch.version.cuda)"\n'
+                "A CUDA build prints a version after the '+', e.g. 2.7.0+cu128; a "
+                "CPU-only build prints None for torch.version.cuda."
+            )
 
         self._torch = torch
         self._auto_model = AutoModelForCausalLM
