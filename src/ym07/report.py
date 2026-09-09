@@ -7,6 +7,8 @@ error_finding item, and that difference is the interesting result.
 
 from __future__ import annotations
 
+import math
+import statistics
 from collections import defaultdict
 from dataclasses import dataclass
 
@@ -25,10 +27,89 @@ class Summary:
     citation_valid_rate: float | None
     cost_usd: float
     dry_run: bool
+    correctness_ci95: float = 0.0   # half-width of the 95% interval
 
 
 def _mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
+
+
+def _ci95(values: list[float]) -> float:
+    """Half-width of the 95% confidence interval on the mean.
+
+    Normal approximation, which is adequate at n=47 and honest about what it
+    is. Reporting a bare mean invites the question an examiner will ask first:
+    is the gap between two conditions larger than the noise?
+    """
+    if len(values) < 2:
+        return 0.0
+    return 1.96 * statistics.stdev(values) / math.sqrt(len(values))
+
+
+@dataclass
+class Paired:
+    """One condition compared against a reference, item by item."""
+
+    condition: str
+    n: int
+    mean_diff: float
+    ci95: float
+    wins: int
+    losses: int
+    ties: int
+
+    @property
+    def significant(self) -> bool:
+        """Whether the interval excludes zero."""
+        return abs(self.mean_diff) > self.ci95 > 0
+
+
+def paired_against(
+    *,
+    runs: list[tuple[dict, list[dict]]],
+    grades: dict[str, Grade],
+    reference: str,
+) -> list[Paired]:
+    """Per-item correctness differences against a reference condition.
+
+    Every condition answers the identical item set, so the comparison is
+    naturally paired: differencing item by item removes the variation caused by
+    some questions simply being harder than others, which an unpaired
+    comparison would leave in the noise term. This is the test H1 needs, and
+    the reference defaults to C1-prompted because that is H1's stated bar.
+    """
+    by_condition: dict[str, dict[str, float]] = defaultdict(dict)
+    for manifest, records in runs:
+        for record in records:
+            grade = grades.get(record["response_id"])
+            if grade is not None:
+                by_condition[manifest["condition"]][record["item_id"]] = grade.correctness
+
+    base = by_condition.get(reference)
+    if not base:
+        return []
+
+    out: list[Paired] = []
+    for condition, scores in by_condition.items():
+        if condition == reference:
+            continue
+        shared = sorted(set(scores) & set(base))
+        diffs = [scores[i] - base[i] for i in shared]
+        if not diffs:
+            continue
+        out.append(
+            Paired(
+                condition=condition,
+                n=len(diffs),
+                mean_diff=_mean(diffs),
+                ci95=_ci95(diffs),
+                wins=sum(1 for d in diffs if d > 0),
+                losses=sum(1 for d in diffs if d < 0),
+                ties=sum(1 for d in diffs if d == 0),
+            )
+        )
+    out.sort(key=lambda p: p.mean_diff, reverse=True)
+    return out
 
 
 def summarise(
@@ -56,6 +137,7 @@ def summarise(
                 citation_valid_rate=_mean([1.0 if c else 0.0 for c in cites]) if cites else None,
                 cost_usd=manifest.get("total_cost_usd", 0.0),
                 dry_run=manifest.get("dry_run", False),
+                correctness_ci95=_ci95([g.correctness for g in graded]),
             )
         )
 
@@ -105,6 +187,8 @@ def render(
     summaries: list[Summary],
     breakdowns: dict[str, dict[str, dict[str, float]]],
     item_set: ItemSet,
+    paired: list[Paired] | None = None,
+    reference: str | None = None,
 ) -> str:
     out: list[str] = ["# Benchmark results", ""]
 
@@ -132,7 +216,7 @@ def render(
                 [
                     s.condition,
                     f"{s.n_graded}/{s.n_responses}",
-                    f"{s.mean_correctness:.3f}",
+                    f"{s.mean_correctness:.3f} ± {s.correctness_ci95:.3f}",
                     f"{s.hard_fail_rate:.3f}",
                     "—" if s.policy_pass_rate is None else f"{s.policy_pass_rate:.3f}",
                     "—" if s.citation_valid_rate is None else f"{s.citation_valid_rate:.3f}",
@@ -142,6 +226,42 @@ def render(
             ],
         )
     )
+
+    if paired:
+        out += [
+            "",
+            f"## Paired comparison against `{reference}`",
+            "",
+            "Every condition answers the identical item set, so differences are taken "
+            "item by item. Pairing removes the variation caused by some questions being "
+            "harder than others, which an unpaired comparison would leave in the noise.",
+            "",
+        ]
+        out.append(
+            _table(
+                ["Condition", "n", "Mean diff", "95% CI", "Better", "Worse", "Tied", "Excludes 0?"],
+                [
+                    [
+                        p.condition,
+                        str(p.n),
+                        f"{p.mean_diff:+.3f}",
+                        f"±{p.ci95:.3f}",
+                        str(p.wins),
+                        str(p.losses),
+                        str(p.ties),
+                        "yes" if p.significant else "no",
+                    ]
+                    for p in paired
+                ],
+            )
+        )
+        out += [
+            "",
+            "A positive mean difference means the condition scored higher than "
+            f"`{reference}`. *Excludes 0* is whether the interval clears zero — where it "
+            "does not, the two are not distinguishable on this item set, and the report "
+            "should say so rather than reading a ranking into the means.",
+        ]
 
     for key, title in (("type", "By item type"), ("topic", "By topic"), ("difficulty", "By difficulty")):
         data = breakdowns.get(key) or {}
@@ -166,7 +286,7 @@ def render(
         "",
         "## Reading this",
         "",
-        "- **Correctness** is the fraction of `must_include` points made, averaged over items.",
+        "- **Correctness** is the fraction of `must_include` points made, averaged over items, with the half-width of its 95% confidence interval.",
         "- **Hard fail** is the rate of answers containing a known failure or an invalid "
         "citation. It is reported separately, never averaged into correctness.",
         "- **Policy** covers `scope` and `integrity` items only — behaviour, judged apart "

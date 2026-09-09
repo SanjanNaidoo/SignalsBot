@@ -24,7 +24,7 @@ from .grading import grade_interactively, load_grades
 from .ingest import ingest
 from .items import coverage, load_items
 from .model import build_client
-from .report import breakdown, render, summarise
+from .report import breakdown, paired_against, render, summarise
 from .retrieval import build_retriever
 from .runner import MissingCorpusError, discover_runs, load_run, run_condition
 
@@ -221,6 +221,8 @@ def cmd_report(args) -> int:
             for key in ("type", "topic", "difficulty")
         },
         item_set=item_set,
+        paired=paired_against(runs=runs, grades=grades, reference=args.baseline),
+        reference=args.baseline,
     )
     if args.out:
         Path(args.out).write_text(text + "\n", encoding="utf-8")
@@ -286,6 +288,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--grades", default=DEFAULT_GRADES)
     p.add_argument("--conditions", nargs="*", default=None)
     p.add_argument("--out", default=None)
+    p.add_argument("--baseline", default="C1-prompted",
+                   help="reference condition for the paired comparison "
+                        "(default: C1-prompted, the bar H1 names)")
     p.set_defaults(func=cmd_report)
 
     args = parser.parse_args(argv)
