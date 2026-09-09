@@ -8,13 +8,11 @@ venv/
 build/
 dist/
 
-# Course materials are copyright UCT / the course convener — never commit them.
-corpus/raw/*
-!corpus/raw/README.md
-# The manifest is a permission trail, not course content. It must survive.
-!corpus/raw/MANIFEST.md
-corpus/processed/*
-!corpus/processed/.gitkeep
+# Course materials are committed, by Sanjan's decision of 2026-09-09. See the
+# permission section of corpus/raw/MANIFEST.md for what was and was not granted.
+# corpus/processed/ is regenerable from corpus/raw/ with `ym07 ingest`; it is
+# committed so a second machine needs no re-ingest, and may be dropped if it
+# starts to drift from the raw material.
 
 # Run outputs were assumed regenerable. For the frontier arm they are not: the
 # five C0 runs cost real money, and they target model versions that expire —

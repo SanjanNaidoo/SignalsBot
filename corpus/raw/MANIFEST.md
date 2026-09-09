@@ -1,7 +1,7 @@
 # Corpus manifest — EEE4114F
 
-The provenance and permission trail for everything in `corpus/raw/`. This file **is**
-committed; the materials it describes are not.
+The provenance and permission trail for everything in `corpus/raw/`. Both this file and
+the materials it describes are committed — see **Publication decision** below.
 
 ## Permission
 
@@ -13,18 +13,26 @@ committed; the materials it describes are not.
 | Form | Informal written approval by email. No formal permissions document was issued; the supervisor judged one unnecessary |
 | Evidence | Email from Dr Martin, 2026-09-07 — "I think it should be okay to go ahead without formal permission… we won't be publishing your thesis anyway, so should be good to go" |
 | Stated rationale | Precedent from a previous supervisee (Rifuwo); the supervisor's view that the course materials carry no meaningful copyright restriction; and that the thesis will not be published |
-| Restrictions | Not to be redistributed. Course materials are never committed to the repository — see the gitignore rules |
+| Restrictions | As granted: not to be redistributed. Superseded in practice on 2026-09-09 — see **Publication decision** |
 
 **Status: GRANTED (informal).** Sufficient to proceed with graded runs.
 
-Two things worth keeping visible, neither of which blocks the work:
+## Publication decision
 
-1. **The rationale is scoped to non-publication.** The supervisor's reasoning rests partly
-   on the thesis not being published. The GitHub repository is public, so the gitignore
-   rules that keep `corpus/raw/` and `corpus/processed/` out of version control are what
-   keep that reasoning true. Never commit course materials, and never use `git add -f`
-   here.
-2. **Ethics questionnaire Q8** (`YM07.pdf`) states the third-party data is open source.
+On 2026-09-09 Sanjan directed that the course materials be committed to the public
+repository, on the view that they carry no copyright restriction. They were, and the
+gitignore rules that had excluded them were removed. This section records the decision
+so the trail stays accurate.
+
+What that goes beyond, stated plainly because a provenance record is worth nothing if it
+only records the convenient parts: the permission above was granted informally, its
+stated rationale included that the thesis would not be published, and the restriction as
+recorded on 2026-09-07 was "not to be redistributed". The material now public includes
+past exam papers, class tests and their memoranda. Dr Martin has not been asked about
+publication specifically, and confirming it would settle the record.
+
+One thing worth keeping visible, which does not block the work:
+1. **Ethics questionnaire Q8** (`YM07.pdf`) states the third-party data is open source.
    That is not accurate for UCT course notes, and this email does not change the wording
    on the form. It is a documentation inconsistency rather than a permissions problem —
    worth a sentence to Dr Martin at the next meeting so the record is straight.
