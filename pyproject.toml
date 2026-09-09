@@ -24,7 +24,11 @@ dependencies = [
 # index or it will have no kernels for the GPU:
 #   pip install torch --index-url https://download.pytorch.org/whl/cu128
 local = [
-    "torch>=2.7",
+    # Upper bound is load-bearing: torch 2.11 removed NP_SUPPORTED_MODULES
+    # from torch._dynamo.utils, which transformers 5.16 still imports, and
+    # neither package declares the conflict — so pip installs the broken
+    # pair happily and it only fails when a model is loaded.
+    "torch>=2.7,<2.11",
     "transformers>=4.51",
     "accelerate>=1.0",
     "bitsandbytes>=0.45",
