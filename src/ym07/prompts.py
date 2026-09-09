@@ -96,16 +96,36 @@ def system_prompt(config: CourseConfig, *, grounded: bool) -> str:
     return "\n".join(lines)
 
 
-def user_prompt(question: str, hits: list[Hit] | None = None) -> str:
-    """The question as sent. Identical across conditions apart from SOURCES."""
-    if not hits:
+def user_prompt(
+    question: str,
+    hits: list[Hit] | None = None,
+    history: list[tuple[str, str]] | None = None,
+) -> str:
+    """The question as sent. Identical across conditions apart from SOURCES.
+
+    `history` is used only by the interactive tutor (`ym07 chat`), which is
+    multi-turn; every benchmark condition passes a single question with no
+    history, so the string a run sends is unchanged by this parameter existing.
+    Keeping one builder means the demo and the measured system cannot drift.
+    """
+    if not hits and not history:
         return question
 
-    blocks = ["SOURCES", ""]
-    for idx, hit in enumerate(hits, start=1):
-        blocks.append(f"[S{idx}] ({hit.chunk.citation()})")
-        blocks.append(hit.chunk.text.strip())
-        blocks.append("")
+    blocks: list[str] = []
+    if hits:
+        blocks += ["SOURCES", ""]
+        for idx, hit in enumerate(hits, start=1):
+            blocks.append(f"[S{idx}] ({hit.chunk.citation()})")
+            blocks.append(hit.chunk.text.strip())
+            blocks.append("")
+        blocks += ["---", ""]
 
-    blocks += ["---", "", "STUDENT QUESTION", "", question]
+    if history:
+        blocks += ["CONVERSATION SO FAR", ""]
+        for speaker, text in history:
+            blocks.append(f"{speaker}: {text}")
+            blocks.append("")
+        blocks += ["---", ""]
+
+    blocks += ["STUDENT QUESTION", "", question]
     return "\n".join(blocks)

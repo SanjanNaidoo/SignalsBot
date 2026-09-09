@@ -1,5 +1,6 @@
 """Command line entry point.
 
+  ym07 chat                      talk to the tutor (the deliverable itself)
   ym07 ingest                    build the retrieval corpus from corpus/raw
   ym07 items                     validate the benchmark set and show coverage
   ym07 conditions                list the experimental conditions
@@ -18,6 +19,7 @@ from pathlib import Path
 
 from .conditions import CONDITIONS, get_condition, repeat
 from .config import load_config
+from .chat import run_chat
 from .grading import grade_interactively, load_grades
 from .ingest import ingest
 from .items import coverage, load_items
@@ -244,6 +246,17 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--raw", default="corpus/raw")
     p.add_argument("--out", default=DEFAULT_CHUNKS)
     p.set_defaults(func=cmd_ingest)
+
+    p = sub.add_parser("chat", help="talk to the tutor interactively")
+    _common(p)
+    p.add_argument("--chunks", default=DEFAULT_CHUNKS)
+    p.add_argument("--provider", default=None,
+                   help="anthropic | local (default: the config's provider)")
+    p.add_argument("--model", default=None, help="override the model id")
+    p.add_argument("--no-retrieval", action="store_true",
+                   help="ungrounded: the C1 tutor rather than the C2 one")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=run_chat)
 
     p = sub.add_parser("run", help="run one or more conditions")
     _common(p)

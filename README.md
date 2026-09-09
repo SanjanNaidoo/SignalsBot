@@ -46,6 +46,7 @@ Common targets:
 |---|---|---|
 | `make demo` | Narrated walkthrough of the whole pipeline | no |
 | `make items` | Validate the item set, show coverage gaps | no |
+| `ym07 chat` | Talk to the tutor — the deliverable itself | yes (free on the local arm) |
 | `make conditions` | What each condition varies, and why | no |
 | `make dry` | Dry-run C0, C1 and C2 | no |
 | `make baseline` | **Real run** of C0 and C1 | yes |
