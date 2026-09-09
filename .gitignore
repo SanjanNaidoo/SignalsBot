@@ -31,3 +31,9 @@ runs/*
 !runs/.gitkeep
 !runs/*-C0-*
 !runs/*-C1-*
+# Dry runs produce fake answers and must never be mistaken for evidence. They
+# are not distinguishable from real runs by directory name - only manifest.json
+# says dry_run - so `git add -A` will happily commit one. Delete dry-run
+# directories rather than relying on a rule that cannot see inside them; the
+# pre-commit check below is the reminder:
+#   grep -l '"dry_run": true' runs/*/manifest.json
